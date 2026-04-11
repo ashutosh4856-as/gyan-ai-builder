@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gyan AI — Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#080810;--bg2:#0d0d1a;--card:#111120;--card2:#181830;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--accent:#6366f1;--al:#818cf8;--a2:#ec4899;--text:#f1f5f9;--t2:#94a3b8;--t3:#475569;--success:#10b981;--warn:#f59e0b;--err:#ef4444}
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh}
+    nav{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+    .logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1rem}
+    .lmark{width:28px;height:28px;background:linear-gradient(135deg,var(--accent),var(--a2));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+    .admin-badge{padding:3px 10px;border-radius:6px;background:rgba(239,68,68,.15);color:var(--err);font-size:.72rem;font-weight:700;border:1px solid rgba(239,68,68,.2)}
+    .main{max-width:1100px;margin:0 auto;padding:24px 20px}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
+    .sc-label{font-size:.72rem;color:var(--t2);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+    .sc-val{font-size:1.8rem;font-weight:900;letter-spacing:-1px}
+    .sc-sub{font-size:.72rem;color:var(--t3);margin-top:4px}
+    .section{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:16px;overflow:hidden}
+    .sec-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .sec-title{font-size:.9rem;font-weight:700}
+    .sec-count{font-size:.75rem;color:var(--t2);background:var(--card2);padding:3px 10px;border-radius:99px}
+    table{width:100%;border-collapse:collapse}
+    th{padding:10px 16px;text-align:left;font-size:.72rem;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+    td{padding:12px 16px;font-size:.8rem;border-bottom:1px solid var(--border)}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:var(--card2)}
+    .status{padding:3px 9px;border-radius:6px;font-size:.68rem;font-weight:700}
+    .s-pending{background:rgba(245,158,11,.12);color:var(--warn)}
+    .s-active{background:rgba(16,185,129,.12);color:var(--success)}
+    .s-free{background:rgba(99,102,241,.1);color:var(--al)}
+    .s-premium{background:rgba(236,72,153,.1);color:var(--a2)}
+    .act-btn{padding:5px 12px;border-radius:7px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+    .btn-activate{background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.2)}
+    .btn-activate:hover{background:rgba(16,185,129,.25)}
+    .btn-reject{background:rgba(239,68,68,.1);color:var(--err);border:1px solid rgba(239,68,68,.15)}
+    .btn-reject:hover{background:rgba(239,68,68,.2)}
+    .btn-view{background:var(--card2);color:var(--t2);border:1px solid var(--border2)}
+    .btn-view:hover{color:var(--text)}
+    .utr{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--al)}
+    .user-id{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--t3)}
+    .login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .login-card{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:36px 32px;width:100%;max-width:380px}
+    .login-card h2{font-size:1.2rem;font-weight:800;margin-bottom:6px}
+    .login-card p{color:var(--t2);font-size:.82rem;margin-bottom:24px}
+    .inp{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-family:inherit;font-size:.85rem;outline:none;margin-bottom:12px;transition:border-color .2s}
+    .inp:focus{border-color:rgba(99,102,241,.4)}
+    .inp::placeholder{color:var(--t3)}
+    .login-btn{width:100%;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+    .login-btn:hover{opacity:.88}
+    .toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:10px;font-size:.78rem;font-weight:500;color:#fff;z-index:1000;animation:ti .3s ease}
+    .toast.success{background:rgba(16,185,129,.9)}
+    .toast.error{background:rgba(239,68,68,.9)}
+    @keyframes ti{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+    .refresh-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--t2);font-size:.75rem;cursor:pointer;font-family:inherit;transition:all .2s}
+    .refresh-btn:hover{color:var(--text);border-color:var(--accent)}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);z-index:500;align-items:center;justify-content:center;padding:16px}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:28px;width:100%;max-width:420px;position:relative}
+    .modal h3{font-size:1rem;font-weight:700;margin-bottom:16px}
+    .info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.8rem}
+    .info-label{color:var(--t2)}
+    .info-val{font-weight:600}
+    .plan-select{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-family:inherit;font-size:.82rem;outline:none;margin:12px 0}
+    .confirm-btn{width:100%;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--success),#059669);color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;transition:all .2s}
+    .confirm-btn:hover{opacity:.88}
+    .close-btn{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:all .2s}
+    .close-btn:hover{color:var(--text);background:var(--card2)}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
+      <div class="lmark">🧠</div>
+      <span style="font-weight:800">Gyan AI Admin</span>
+    </div>
+    <h2>Admin Login</h2>
+    <p>Enter your admin key to access the panel</p>
+    <input class="inp" type="password" id="adminKeyInput" placeholder="Enter admin key..." onkeydown="if(event.key==='Enter')adminLogin()"/>
+    <button class="login-btn" onclick="adminLogin()">Login →</button>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="hidden">
+  <nav>
+    <div class="logo">
+      <div class="lmark">🧠</div>
+      Gyan AI
+      <span class="admin-badge">ADMIN</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+      <button class="refresh-btn" onclick="adminLogout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="main">
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="sc-label">Total Users</div>
+        <div class="sc-val" id="statUsers">—</div>
+        <div class="sc-sub">Registered</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">Premium Users</div>
+        <div class="sc-val" id="statPremium">—</div>
+        <div class="sc-sub">Active plans</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">Pending Payments</div>
+        <div class="sc-val" id="statPending" style="color:var(--warn)">—</div>
+        <div class="sc-sub">Need verification</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">Total Apps</div>
+        <div class="sc-val" id="statApps">—</div>
+        <div class="sc-sub">Built today</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">Revenue Today</div>
+        <div class="sc-val" id="statRevenue" style="color:var(--success)">—</div>
+        <div class="sc-sub">Estimated</div>
+      </div>
+    </div>
+
+    <!-- PENDING PAYMENTS -->
+    <div class="section">
+      <div class="sec-header">
+        <div class="sec-title">⏳ Pending Payments</div>
+        <div class="sec-count" id="pendingCount">0 pending</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>User ID / Email</th>
+            <th>Plan</th>
+            <th>Amount</th>
+            <th>UTR / Screenshot</th>
+            <th>Time</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="pendingTable">
+          <tr><td colspan="6" style="text-align:center;color:var(--t3);padding:24px">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ALL USERS -->
+    <div class="section">
+      <div class="sec-header">
+        <div class="sec-title">👥 All Users</div>
+        <div class="sec-count" id="usersCount">0 users</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email / Phone</th>
+            <th>User ID</th>
+            <th>Plan</th>
+            <th>Credits</th>
+            <th>Apps Built</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="usersTable">
+          <tr><td colspan="8" style="text-align:center;color:var(--t3);padding:24px">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ACTIVATE MODAL -->
+<div class="modal-overlay" id="activateModal">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h3>✅ Activate Premium</h3>
+    <div id="modalUserInfo"></div>
+    <select class="plan-select" id="planSelect">
+      <option value="premium_light">Premium Light — ₹99 / 15 days</option>
+      <option value="premium">Premium — ₹199 / 1 month</option>
+      <option value="developer">Developer — ₹299 / 1 month</option>
+    </select>
+    <button class="confirm-btn" onclick="confirmActivate()">✅ Activate Plan</button>
+  </div>
+</div>
+
+<script>
+  const API = 'https://api.gyan-ai.tech';
+  let adminKey = '';
+  let selectedUserId = '';
+
+  // ── LOGIN ──
+  function adminLogin() {
+    const key = document.getElementById('adminKeyInput').value.trim();
+    if (!key) return showToast('Enter admin key', 'error');
+    adminKey = key;
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('adminPanel').classList.remove('hidden');
+    loadAll();
+  }
+
+  function adminLogout() {
+    adminKey = '';
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('adminPanel').classList.add('hidden');
+  }
+
+  // ── LOAD ALL DATA ──
+  async function loadAll() {
+    await Promise.all([loadPending(), loadUsers(), loadStats()]);
+  }
+
+  // ── LOAD STATS ──
+  async function loadStats() {
+    try {
+      const res = await fetch(`${API}/api/admin/stats`, {
+        headers: { 'x-admin-key': adminKey }
+      });
+      const data = await res.json();
+      if (data.stats) {
+        document.getElementById('statUsers').textContent = data.stats.totalUsers || '0';
+        document.getElementById('statPremium').textContent = data.stats.premiumUsers || '0';
+        document.getElementById('statPending').textContent = data.stats.pendingPayments || '0';
+        document.getElementById('statApps').textContent = data.stats.appsToday || '0';
+        document.getElementById('statRevenue').textContent = '₹' + (data.stats.revenueToday || '0');
+      }
+    } catch (err) {
+      // Use demo data if API not ready
+      document.getElementById('statUsers').textContent = '0';
+      document.getElementById('statPremium').textContent = '0';
+      document.getElementById('statPending').textContent = '0';
+      document.getElementById('statApps').textContent = '0';
+      document.getElementById('statRevenue').textContent = '₹0';
+    }
+  }
+
+  // ── LOAD PENDING PAYMENTS ──
+  async function loadPending() {
+    try {
+      const res = await fetch(`${API}/api/payment/admin/pending`, {
+        headers: { 'x-admin-key': adminKey }
+      });
+      const data = await res.json();
+      const payments = data.payments || [];
+      document.getElementById('pendingCount').textContent = `${payments.length} pending`;
+
+      const tbody = document.getElementById('pendingTable');
+      if (payments.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:24px">✅ No pending payments</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = payments.map(p => `
+        <tr>
+          <td>
+            <div style="font-size:.78rem;font-weight:600">${p.users?.name || 'Unknown'}</div>
+            <div class="user-id">${p.user_id}</div>
+            <div style="font-size:.7rem;color:var(--t2)">${p.users?.email || ''}</div>
+          </td>
+          <td><span class="status s-pending">${p.plan_id}</span></td>
+          <td style="font-weight:700">₹${p.amount}</td>
+          <td>
+            <div class="utr">${p.utr || 'No UTR'}</div>
+            ${p.screenshot_url ? `<a href="${p.screenshot_url}" target="_blank" style="font-size:.68rem;color:var(--al)">View screenshot →</a>` : ''}
+          </td>
+          <td style="color:var(--t3)">${formatDate(p.created_at)}</td>
+          <td style="display:flex;gap:6px">
+            <button class="act-btn btn-activate" onclick="openActivate('${p.user_id}','${p.users?.name}','${p.users?.email}','${p.plan_id}')">✅ Activate</button>
+            <button class="act-btn btn-reject" onclick="rejectPayment('${p.id}')">✗ Reject</button>
+          </td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      document.getElementById('pendingTable').innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:24px">Connect to API to see payments</td></tr>`;
+    }
+  }
+
+  // ── LOAD USERS ──
+  async function loadUsers() {
+    try {
+      const res = await fetch(`${API}/api/admin/users`, {
+        headers: { 'x-admin-key': adminKey }
+      });
+      const data = await res.json();
+      const users = data.users || [];
+      document.getElementById('usersCount').textContent = `${users.length} users`;
+
+      const tbody = document.getElementById('usersTable');
+      if (users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--t3);padding:24px">No users yet</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = users.map(u => `
+        <tr>
+          <td style="font-weight:600">${u.name || '—'}</td>
+          <td style="color:var(--t2)">${u.email || u.phone || '—'}</td>
+          <td class="user-id">${u.id?.slice(0,12)}...</td>
+          <td><span class="status ${u.plan === 'free' ? 's-free' : 's-premium'}">${u.plan}</span></td>
+          <td style="text-align:center">${u.credits || 0}</td>
+          <td style="text-align:center">${u.apps_count || 0}</td>
+          <td style="color:var(--t3)">${formatDate(u.created_at)}</td>
+          <td>
+            <button class="act-btn btn-activate" onclick="openActivate('${u.id}','${u.name}','${u.email || u.phone}','${u.plan}')">Edit Plan</button>
+          </td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      document.getElementById('usersTable').innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--t3);padding:24px">Connect to API to see users</td></tr>`;
+    }
+  }
+
+  // ── ACTIVATE PREMIUM ──
+  function openActivate(userId, name, email, currentPlan) {
+    selectedUserId = userId;
+    document.getElementById('modalUserInfo').innerHTML = `
+      <div class="info-row"><span class="info-label">Name</span><span class="info-val">${name || '—'}</span></div>
+      <div class="info-row"><span class="info-label">Email</span><span class="info-val">${email || '—'}</span></div>
+      <div class="info-row"><span class="info-label">Current Plan</span><span class="info-val">${currentPlan}</span></div>
+    `;
+    document.getElementById('activateModal').classList.add('open');
+  }
+
+  async function confirmActivate() {
+    const plan = document.getElementById('planSelect').value;
+    try {
+      const res = await fetch(`${API}/api/admin/activate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey
+        },
+        body: JSON.stringify({ userId: selectedUserId, plan })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`✅ ${plan} activated!`, 'success');
+        closeModal();
+        loadAll();
+      } else {
+        showToast(data.error || 'Failed', 'error');
+      }
+    } catch (err) {
+      showToast('API not connected yet', 'error');
+    }
+  }
+
+  async function rejectPayment(paymentId) {
+    if (!confirm('Reject this payment?')) return;
+    showToast('Payment rejected', 'error');
+    loadPending();
+  }
+
+  function closeModal() {
+    document.getElementById('activateModal').classList.remove('open');
+    selectedUserId = '';
+  }
+
+  // ── HELPERS ──
+  function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  }
+
+  let toastTimeout;
+  function showToast(msg, type = 'success') {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => t.remove(), 3000);
+  }
+
+  document.getElementById('activateModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('activateModal')) closeModal();
+  });
+</script>
+</body>
+</html>
