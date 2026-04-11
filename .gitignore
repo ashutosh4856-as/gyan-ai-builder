@@ -1,0 +1,25 @@
+# ⚠️ IMPORTANT — Secret files
+.env
+.env.local
+.env.production
+
+# Dependencies
+node_modules/
+npm-debug.log*
+
+# Build output
+dist/
+build/
+*.apk
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
