@@ -1,0 +1,74 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_id:
+        description: 'Build ID'
+        required: true
+      app_name:
+        description: 'App Name'
+        required: true
+      html_content:
+        description: 'HTML Content (base64)'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Cordova
+        run: npm install -g cordova
+
+      - name: Decode HTML
+        run: |
+          echo "${{ github.event.inputs.html_content }}" | base64 -d > /tmp/index.html
+          cat /tmp/index.html
+
+      - name: Create Cordova Project
+        run: |
+          APP_NAME="${{ github.event.inputs.app_name }}"
+          BUILD_ID="${{ github.event.inputs.build_id }}"
+          cordova create /tmp/myapp com.gyanai.${APP_NAME} ${APP_NAME}
+          cp /tmp/index.html /tmp/myapp/www/index.html
+
+      - name: Add Android Platform
+        run: |
+          cd /tmp/myapp
+          cordova platform add android
+
+      - name: Build APK
+        run: |
+          cd /tmp/myapp
+          cordova build android --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: gyan-ai-${{ github.event.inputs.build_id }}
+          path: /tmp/myapp/platforms/android/app/build/outputs/apk/release/*.apk
+          retention-days: 7
+
+      - name: Notify Backend
+        run: |
+          curl -X POST https://api.gyan-ai.tech/api/apk/webhook/complete \
+            -H "Content-Type: application/json" \
+            -H "x-webhook-secret: ${{ secrets.WEBHOOK_SECRET }}" \
+            -d '{
+              "buildId": "${{ github.event.inputs.build_id }}",
+              "status": "completed"
+            }'
