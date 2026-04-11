@@ -9,17 +9,17 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-const aiRoutes = require('./routes/ai');
-const authRoutes = require('./routes/auth');
-const deployRoutes = require('./routes/deploy');
-const creditsRoutes = require('./routes/credits');
-const apkRoutes = require('./routes/apk');
-const paymentRoutes = require('./routes/payment');
+const aiRoutes = require('./ai');
+const { router: authRoutes } = require('./auth');
+const deployRoutes = require('./deploy');
+const creditsRoutes = require('./credits');
+const apkRoutes = require('./apk');
+const paymentRoutes = require('./payment');
+const adminRoutes = require('./admin-routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ── SECURITY ──
 app.use(helmet());
 app.use(cors({
   origin: [
@@ -31,15 +31,14 @@ app.use(cors({
   credentials: true
 }));
 
-// ── RATE LIMITING ──
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 100,
   message: { error: 'Too many requests. Please wait.' }
 });
 
 const aiLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
+  windowMs: 60 * 1000,
   max: 10,
   message: { error: 'AI rate limit reached. Wait 1 minute.' }
 });
@@ -55,6 +54,7 @@ app.use('/api/deploy', deployRoutes);
 app.use('/api/credits', creditsRoutes);
 app.use('/api/apk', apkRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ── HEALTH CHECK ──
 app.get('/health', (req, res) => {
@@ -66,34 +66,21 @@ app.get('/health', (req, res) => {
   });
 });
 
-// ── ROOT ──
 app.get('/', (req, res) => {
   res.json({ message: 'Gyan AI API is running 🧠' });
 });
 
-// ── ERROR HANDLER ──
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
-  res.status(err.status || 500).json({
-    error: err.message || 'Something went wrong',
-    timestamp: new Date().toISOString()
-  });
+  res.status(err.status || 500).json({ error: err.message || 'Something went wrong' });
 });
 
-// ── 404 ──
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// ── START ──
 app.listen(PORT, () => {
-  console.log(`
-  ╔════════════════════════════════╗
-  ║   🧠 GYAN AI Server Running   ║
-  ║   Port: ${PORT}                   ║
-  ║   Mode: ${process.env.NODE_ENV || 'development'}            ║
-  ╚════════════════════════════════╝
-  `);
+  console.log(`🧠 Gyan AI Server running on port ${PORT}`);
 });
 
 module.exports = app;
