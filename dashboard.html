@@ -1,317 +1,334 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gyan AI — Builder</title>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <title>Gyan AI — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
-    :root{--bg:#f8f8fc;--bg2:#f0f0f8;--card:#ffffff;--card2:#ebebf5;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.13);--accent:#5b5cf6;--a2:#e8407a;--text:#0c0c1d;--t2:#4a4a6a;--t3:#9090b0;--success:#16a34a;--shadow:0 2px 12px rgba(0,0,0,0.07)}
-    [data-theme="dark"]{--bg:#08080f;--bg2:#0d0d1a;--card:#111120;--card2:#181830;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#f0f0ff;--t2:#9090b8;--t3:#5a5a7a;--shadow:0 2px 12px rgba(0,0,0,0.3)}
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;transition:background .3s,color .3s}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#f4f4f8;font-family:'Sora',sans-serif;min-height:100vh}
 
-    /* TOP BAR */
-    .topbar{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0;gap:8px}
-    .logo{display:flex;align-items:center;gap:7px;font-size:.92rem;font-weight:800;text-decoration:none;color:var(--text)}
-    .lmark{width:28px;height:28px;background:linear-gradient(135deg,var(--accent),var(--a2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;box-shadow:0 3px 10px rgba(91,92,246,0.3);flex-shrink:0}
-    .tb-center{display:flex;gap:2px;background:var(--bg2);border-radius:8px;padding:3px;border:1px solid var(--border)}
-    .tab{padding:5px 12px;border-radius:6px;font-size:.75rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--t2);font-family:inherit;transition:all .2s;white-space:nowrap}
-    .tab.active{background:var(--accent);color:#fff}
-    .tb-right{display:flex;align-items:center;gap:6px}
-    .icon-btn{width:30px;height:30px;border-radius:7px;border:1px solid var(--border2);background:transparent;color:var(--t2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.8rem;transition:all .2s;flex-shrink:0}
-    .icon-btn:hover{color:var(--text);border-color:var(--accent)}
-    .pub-btn{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff;font-size:.76rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 12px rgba(91,92,246,0.3);transition:all .2s}
-    .pub-btn:hover{opacity:.88;transform:scale(1.02)}
+    /* NAV */
+    nav{background:#fff;border-bottom:1px solid #e8e8f0;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .nav-logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1rem;text-decoration:none;color:#0c0c1d}
+    .lmark{width:30px;height:30px;background:linear-gradient(135deg,#5b5cf6,#e8407a);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;box-shadow:0 3px 10px rgba(91,92,246,0.3)}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .nav-plan{padding:3px 10px;border-radius:6px;background:rgba(91,92,246,0.08);color:#5b5cf6;font-size:.7rem;font-weight:700}
+    .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#5b5cf6,#e8407a);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer}
 
     /* MAIN */
-    .main{display:flex;flex:1;overflow:hidden}
+    .main{max-width:900px;margin:0 auto;padding:32px 20px}
 
-    /* SIDEBAR */
-    .sidebar{width:200px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
-    @media(max-width:600px){.sidebar{display:none}}
-    .sb-sec{padding:10px 8px 4px}
-    .sb-lbl{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);padding:0 6px;margin-bottom:4px}
-    .sb-item{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:7px;cursor:pointer;font-size:.77rem;font-weight:500;color:var(--t2);transition:all .2s;border:none;background:transparent;font-family:inherit;width:100%;text-align:left}
-    .sb-item:hover{background:var(--card2);color:var(--text)}
-    .sb-item.active{background:rgba(91,92,246,0.1);color:var(--accent)}
-    .sb-ico{width:15px;text-align:center;font-size:.82rem;flex-shrink:0}
-    .credit-box{margin:8px;padding:10px 12px;border-radius:10px;background:var(--bg2);border:1px solid var(--border)}
-    .cr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-    .cr-lbl{font-size:.68rem;font-weight:600;color:var(--t2)}
-    .cr-val{font-size:.68rem;font-weight:700;color:var(--accent)}
-    .cr-bar{height:3px;background:var(--border2);border-radius:99px;overflow:hidden}
-    .cr-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--a2));border-radius:99px}
-    .cr-sub{font-size:.62rem;color:var(--t3);margin-top:5px}
-    .up-btn{display:flex;align-items:center;justify-content:center;gap:4px;padding:7px;border-radius:7px;border:1px solid rgba(91,92,246,0.2);background:rgba(91,92,246,0.06);color:var(--accent);font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;width:calc(100% - 16px);margin:0 8px 8px;transition:all .2s}
-    .up-btn:hover{background:rgba(91,92,246,0.12)}
+    /* GREETING */
+    .greeting{margin-bottom:32px}
+    .greeting h1{font-size:clamp(1.4rem,4vw,2rem);font-weight:800;letter-spacing:-.5px;margin-bottom:6px}
+    .greeting p{color:#666;font-size:.88rem}
 
-    /* EDITOR */
-    .editor-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-    .file-tabs{display:flex;align-items:center;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 10px;height:34px;overflow-x:auto;flex-shrink:0;gap:2px}
-    .ftab{display:flex;align-items:center;gap:5px;padding:5px 11px;font-size:.72rem;font-weight:500;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
-    .ftab.active{color:var(--text);border-bottom-color:var(--accent)}
-    .ftdot{width:5px;height:5px;border-radius:50%;background:var(--a2)}
-    .code-wrap{flex:1;display:flex;overflow:hidden}
-    .line-nums{padding:14px 10px;background:var(--bg2);border-right:1px solid var(--border);text-align:right;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--t3);line-height:1.75;user-select:none;min-width:36px;overflow:hidden;flex-shrink:0}
-    .code-area{flex:1;padding:14px;overflow:auto;font-family:'JetBrains Mono',monospace;font-size:.72rem;line-height:1.75;outline:none;white-space:pre;color:var(--text);tab-size:2}
-    .code-area::-webkit-scrollbar{width:4px;height:4px}
-    .code-area::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+    /* PROMPT BOX */
+    .build-box{background:#fff;border-radius:20px;padding:20px;box-shadow:0 2px 16px rgba(0,0,0,0.06);margin-bottom:28px;border:1.5px solid #e8e8f0}
+    .build-box:focus-within{border-color:#5b5cf6;box-shadow:0 2px 20px rgba(91,92,246,0.1)}
+    .build-textarea{width:100%;border:none;outline:none;font-family:inherit;font-size:.95rem;resize:none;min-height:80px;line-height:1.6;color:#0c0c1d;background:transparent}
+    .build-textarea::placeholder{color:#bbb}
+    .build-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid #f0f0f8;gap:10px;flex-wrap:wrap}
+    .build-chips{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+    .chip{padding:5px 12px;border-radius:8px;border:1px solid #e0e0e0;background:#f8f8fc;color:#555;font-size:.72rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all .2s}
+    .chip:hover{border-color:#5b5cf6;color:#5b5cf6;background:#f0f0ff}
+    .build-btn{display:flex;align-items:center;gap:6px;padding:10px 22px;border-radius:12px;border:none;background:linear-gradient(135deg,#5b5cf6,#e8407a);color:#fff;font-weight:700;font-size:.88rem;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 4px 14px rgba(91,92,246,0.28);transition:all .2s}
+    .build-btn:hover{transform:scale(1.03);box-shadow:0 6px 20px rgba(91,92,246,0.4)}
 
-    /* GENERATING */
-    .gen-overlay{display:none;position:absolute;inset:0;background:var(--bg);z-index:10;padding:20px;overflow:auto}
-    .gen-overlay.show{display:block}
-    .gen-line{font-family:'JetBrains Mono',monospace;font-size:.72rem;line-height:1.75;opacity:0;animation:gl .2s ease forwards}
-    @keyframes gl{to{opacity:1}}
-    .cursor{display:inline-block;width:7px;height:13px;background:var(--accent);vertical-align:middle;animation:bl .7s infinite}
-    @keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+    /* CATEGORIES */
+    .section-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#aaa;margin-bottom:14px}
+    .cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:32px}
+    .cat{background:#fff;border-radius:14px;padding:16px;border:1px solid #e8e8f0;cursor:pointer;transition:all .2s;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,0.04)}
+    .cat:hover{border-color:#5b5cf6;transform:translateY(-2px);box-shadow:0 4px 16px rgba(91,92,246,0.1)}
+    .cat-ico{font-size:1.6rem;margin-bottom:8px}
+    .cat-name{font-size:.78rem;font-weight:600;color:#333}
 
-    /* STATUS */
-    .status-bar{height:22px;display:flex;align-items:center;gap:14px;padding:0 10px;background:var(--accent);font-size:.62rem;font-weight:500;color:rgba(255,255,255,.85);flex-shrink:0}
-    .sb-s{display:flex;align-items:center;gap:3px}
+    /* APPS */
+    .apps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:32px}
+    .app-card{background:#fff;border-radius:16px;overflow:hidden;border:1px solid #e8e8f0;cursor:pointer;transition:all .2s;box-shadow:0 1px 6px rgba(0,0,0,0.04)}
+    .app-card:hover{border-color:#5b5cf6;transform:translateY(-3px);box-shadow:0 8px 24px rgba(91,92,246,0.1)}
+    .app-thumb{height:120px;background:linear-gradient(135deg,#f0f0ff,#fff0f8);display:flex;align-items:center;justify-content:center;font-size:2.5rem;border-bottom:1px solid #f0f0f8}
+    .app-body{padding:14px}
+    .app-name{font-size:.88rem;font-weight:700;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .app-url{font-size:.7rem;color:#5b5cf6;font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:10px}
+    .app-footer{display:flex;align-items:center;justify-content:space-between}
+    .app-status{display:flex;align-items:center;gap:4px;font-size:.68rem;font-weight:600;color:#16a34a}
+    .status-dot{width:5px;height:5px;border-radius:50%;background:#16a34a;animation:pp 2s infinite}
+    @keyframes pp{0%,100%{opacity:1}50%{opacity:.3}}
+    .app-date{font-size:.66rem;color:#aaa}
+    .app-actions{display:flex;gap:6px;margin-top:10px}
+    .app-btn{flex:1;padding:6px;border-radius:8px;border:1px solid #e0e0e0;background:transparent;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;color:#555}
+    .app-btn:hover{border-color:#5b5cf6;color:#5b5cf6}
+    .app-btn.primary{background:linear-gradient(135deg,#5b5cf6,#e8407a);border:none;color:#fff}
 
-    /* RIGHT PANEL */
-    .right-panel{width:360px;display:flex;flex-direction:column;border-left:1px solid var(--border);flex-shrink:0;background:var(--card)}
-    @media(max-width:800px){.right-panel{width:260px}}
-    @media(max-width:500px){.right-panel{width:100%;position:absolute;bottom:0;left:0;right:0;height:50%;border-top:1px solid var(--border)}}
-    .preview-hdr{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;border-bottom:1px solid var(--border);flex-shrink:0}
-    .ph-tabs{display:flex;gap:2px}
-    .ph-tab{padding:4px 9px;border-radius:5px;font-size:.7rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--t2);font-family:inherit;transition:all .2s}
-    .ph-tab.active{background:var(--card2);color:var(--text)}
-    .preview-frame{flex:1;overflow:hidden;position:relative}
-    .preview-iframe{width:100%;height:100%;border:none;background:#fff}
-    .preview-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--t3);text-align:center;padding:20px}
-    .pe-ico{font-size:2.2rem;opacity:.35}
-    .pe-txt{font-size:.76rem;line-height:1.5;max-width:160px}
+    /* EMPTY STATE */
+    .empty{text-align:center;padding:48px 20px;background:#fff;border-radius:20px;border:2px dashed #e0e0e0}
+    .empty-ico{font-size:3rem;margin-bottom:14px;opacity:.4}
+    .empty h3{font-size:1rem;font-weight:700;margin-bottom:6px;color:#333}
+    .empty p{font-size:.82rem;color:#aaa;margin-bottom:20px}
 
-    /* CHAT */
-    .chat-area{height:200px;display:flex;flex-direction:column;border-top:1px solid var(--border);flex-shrink:0}
-    .chat-msgs{flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:7px}
-    .chat-msgs::-webkit-scrollbar{width:3px}
-    .chat-msgs::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
-    .msg{display:flex;gap:6px;align-items:flex-start}
-    .msg-av{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;margin-top:1px}
-    .msg-ai .msg-av{background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff}
-    .msg-user .msg-av{background:var(--card2);color:var(--t2)}
-    .msg-bubble{padding:6px 9px;border-radius:9px;font-size:.74rem;line-height:1.5;max-width:88%}
-    .msg-ai .msg-bubble{background:var(--bg2);border:1px solid var(--border);color:var(--text)}
-    .msg-user .msg-bubble{background:rgba(91,92,246,0.1);border:1px solid rgba(91,92,246,0.15);color:var(--text);margin-left:auto}
-    .msg-user{flex-direction:row-reverse}
-    .chat-inp-area{padding:7px 8px;border-top:1px solid var(--border);display:flex;gap:5px;align-items:flex-end}
-    .chat-inp{flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:9px;padding:7px 11px;color:var(--text);font-family:inherit;font-size:.75rem;resize:none;outline:none;min-height:32px;max-height:72px;line-height:1.5;transition:border-color .2s}
-    .chat-inp:focus{border-color:rgba(91,92,246,0.4)}
-    .chat-inp::placeholder{color:var(--t3)}
-    .chat-send{width:30px;height:30px;border-radius:7px;border:none;background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.78rem;flex-shrink:0;transition:all .2s}
-    .chat-send:hover{opacity:.85;transform:scale(1.05)}
+    /* CREDITS */
+    .credits-bar{background:#fff;border-radius:16px;padding:16px 20px;border:1px solid #e8e8f0;margin-bottom:28px;display:flex;align-items:center;gap:16px;box-shadow:0 1px 6px rgba(0,0,0,0.04)}
+    .cr-info{flex:1}
+    .cr-title{font-size:.75rem;font-weight:600;color:#666;margin-bottom:6px}
+    .cr-bar-wrap{height:6px;background:#f0f0f8;border-radius:99px;overflow:hidden;margin-bottom:4px}
+    .cr-fill{height:100%;background:linear-gradient(90deg,#5b5cf6,#e8407a);border-radius:99px;transition:width .5s}
+    .cr-text{font-size:.68rem;color:#aaa}
+    .up-btn{padding:8px 16px;border-radius:10px;border:none;background:linear-gradient(135deg,#5b5cf6,#e8407a);color:#fff;font-size:.76rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 10px rgba(91,92,246,0.25)}
 
-    /* PUBLISH MODAL */
-    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);z-index:500;align-items:center;justify-content:center;padding:16px}
-    .overlay.open{display:flex}
-    .modal{background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:26px;width:100%;max-width:420px;position:relative;box-shadow:0 24px 60px rgba(0,0,0,0.15);animation:mi .25s cubic-bezier(.175,.885,.32,1.275) both}
-    @keyframes mi{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
-    .mc{position:absolute;top:11px;right:11px;width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:all .2s}
-    .mc:hover{color:var(--text);background:var(--bg2)}
-    .modal h2{font-size:1rem;font-weight:800;margin-bottom:5px}
-    .modal-sub{font-size:.76rem;color:var(--t2);margin-bottom:18px}
-    .url-row{display:flex;align-items:center;background:var(--bg2);border:1.5px solid var(--border2);border-radius:10px;overflow:hidden;margin-bottom:14px;transition:border-color .2s}
-    .url-row:focus-within{border-color:var(--accent)}
-    .url-pre{padding:9px 11px;font-size:.74rem;color:var(--t3);white-space:nowrap;border-right:1px solid var(--border2);font-family:'JetBrains Mono',monospace}
-    .url-field{flex:1;padding:9px 11px;background:transparent;border:none;outline:none;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.74rem}
-    .url-suf{padding:9px 11px;font-size:.74rem;color:var(--t3);border-left:1px solid var(--border2);font-family:'JetBrains Mono',monospace;white-space:nowrap}
-    .url-status{font-size:.7rem;margin-bottom:14px;display:flex;align-items:center;gap:4px}
-    .url-ok{color:var(--success)}
-    .url-err{color:#ef4444}
-    .pub-final{width:100%;padding:11px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;box-shadow:0 4px 14px rgba(91,92,246,0.28)}
-    .pub-final:hover{opacity:.88}
-    .pub-final:disabled{opacity:.5;cursor:not-allowed}
+    /* BOTTOM NAV (mobile) */
+    .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e8e8f0;padding:8px 0 12px;z-index:100}
+    @media(max-width:600px){.bottom-nav{display:flex;justify-content:space-around}}
+    .bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 12px;border-radius:10px;transition:all .2s}
+    .bn-item.active{color:#5b5cf6}
+    .bn-ico{font-size:1.2rem}
+    .bn-label{font-size:.62rem;font-weight:600;color:inherit}
+    @media(max-width:600px){.main{padding-bottom:80px}}
 
-    /* TOAST */
-    .toast{position:fixed;bottom:16px;right:16px;padding:9px 14px;border-radius:9px;font-size:.75rem;font-weight:500;color:#fff;z-index:1000;animation:ti .3s ease;box-shadow:0 6px 20px rgba(0,0,0,.15)}
-    .toast.success{background:rgba(22,163,74,.92)}
-    .toast.error{background:rgba(239,68,68,.92)}
-    .toast.info{background:rgba(91,92,246,.92)}
-    @keyframes ti{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
-
-    /* SYNTAX */
-    .kw{color:#5b5cf6}.str{color:#16a34a}.fn{color:#b45309}.cm{color:#9090b0}.tg{color:#e8407a}.at{color:#0891b2}.nm{color:#c2410c}
+    /* LOADING */
+    .loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,0.9);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+    .loading-overlay.show{display:flex}
+    .spinner{width:40px;height:40px;border:3px solid #f0f0f8;border-top-color:#5b5cf6;border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-text{font-size:.88rem;font-weight:600;color:#555}
+    .loading-sub{font-size:.75rem;color:#aaa}
   </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <div style="display:flex;align-items:center;gap:8px">
-    <a href="index.html" class="logo"><div class="lmark">🧠</div>Gyan AI</a>
-    <div class="tb-center">
-      <button class="tab active" onclick="switchTab('build',this)">⚡ Build</button>
-      <button class="tab" onclick="switchTab('apps',this)">📱 Apps</button>
-    </div>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="lmark">🧠</div>
+    Gyan AI
+  </a>
+  <div class="nav-right">
+    <div class="nav-plan" id="navPlan">Free</div>
+    <div class="avatar" id="navAvatar">A</div>
   </div>
-  <div class="tb-right">
-    <button class="icon-btn" onclick="toggleTheme()" id="tbt">🌙</button>
-    <button class="pub-btn" onclick="openPublish()">🚀 Publish</button>
+</nav>
+
+<div class="main">
+
+  <!-- GREETING -->
+  <div class="greeting">
+    <h1 id="greetText">Hi, What will you build next?</h1>
+    <p>Describe your app idea below or pick a category</p>
   </div>
-</div>
 
-<!-- MAIN -->
-<div class="main" id="mainArea">
-
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="sb-sec">
-      <div class="sb-lbl">Files</div>
-      <button class="sb-item active" onclick="setFile('index.html',this)"><span class="sb-ico">📄</span>index.html</button>
-      <button class="sb-item" onclick="setFile('style.css',this)"><span class="sb-ico">🎨</span>style.css</button>
-      <button class="sb-item" onclick="setFile('app.js',this)"><span class="sb-ico">⚡</span>app.js</button>
-    </div>
-    <div class="sb-sec">
-      <div class="sb-lbl">Actions</div>
-      <button class="sb-item" onclick="openPublish()"><span class="sb-ico">🚀</span>Publish</button>
-      <button class="sb-item" onclick="downloadCode()"><span class="sb-ico">📥</span>Download</button>
-      <button class="sb-item" onclick="clearCode()"><span class="sb-ico">🗑️</span>Clear</button>
-    </div>
-    <div style="flex:1"></div>
-    <div class="credit-box">
-      <div class="cr-top"><div class="cr-lbl">Credits</div><div class="cr-val" id="creditVal">2 / 5</div></div>
-      <div class="cr-bar"><div class="cr-fill" id="creditBar" style="width:40%"></div></div>
-      <div class="cr-sub">Renews 1st every month</div>
+  <!-- CREDITS -->
+  <div class="credits-bar" id="creditsBar">
+    <div class="cr-info">
+      <div class="cr-title">Credits — <span id="crVal">5</span> remaining</div>
+      <div class="cr-bar-wrap"><div class="cr-fill" id="crFill" style="width:100%"></div></div>
+      <div class="cr-text">5 credits = 1 app • 1 credit/day • Renews 1st every month</div>
     </div>
     <button class="up-btn" onclick="window.location.href='payment.html'">✨ Upgrade</button>
   </div>
 
-  <!-- BUILD VIEW -->
-  <div class="editor-area" id="buildView" style="position:relative">
-    <div class="file-tabs">
-      <div class="ftab active" id="ft-index"><div class="ftdot"></div>index.html</div>
-      <div class="ftab" id="ft-style">style.css</div>
-      <div class="ftab" id="ft-js">app.js</div>
-    </div>
-    <div class="code-wrap">
-      <div class="line-nums" id="lineNums">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10</div>
-      <div class="code-area" id="codeArea" contenteditable="true" spellcheck="false"><span class="cm">&lt;!-- Gyan AI will generate your code here ✨ --&gt;</span>
-<span class="tg">&lt;!DOCTYPE</span> <span class="at">html</span><span class="tg">&gt;</span>
-<span class="tg">&lt;html&gt;</span>
-<span class="tg">&lt;head&gt;</span>
-  <span class="tg">&lt;title&gt;</span>My App<span class="tg">&lt;/title&gt;</span>
-<span class="tg">&lt;/head&gt;</span>
-<span class="tg">&lt;body&gt;</span>
-  <span class="tg">&lt;h1&gt;</span>Hello! 🧠<span class="tg">&lt;/h1&gt;</span>
-  <span class="tg">&lt;p&gt;</span>Describe your app in the chat below<span class="tg">&lt;/p&gt;</span>
-<span class="tg">&lt;/body&gt;&lt;/html&gt;</span></div>
-    </div>
-    <div class="status-bar">
-      <div class="sb-s" id="statusText">⚡ Ready</div>
-      <div class="sb-s">📄 index.html</div>
-      <div style="margin-left:auto" class="sb-s" id="statusRight">Gyan AI v1.0</div>
+  <!-- BUILD BOX -->
+  <div class="build-box">
+    <textarea class="build-textarea" id="promptInput" placeholder="Describe the app you want to create..." rows="3"></textarea>
+    <div class="build-bottom">
+      <div class="build-chips">
+        <button class="chip" onclick="setPrompt('Tasks & Workflows app')">📋 Tasks</button>
+        <button class="chip" onclick="setPrompt('Online shop with products and cart')">🛒 Shop</button>
+        <button class="chip" onclick="setPrompt('Portfolio website')">👤 Portfolio</button>
+        <button class="chip" onclick="setPrompt('Restaurant with menu and booking')">🍽️ Restaurant</button>
+        <button class="chip" onclick="setPrompt('Blog with articles')">📝 Blog</button>
+        <button class="chip" onclick="setPrompt('Landing page for startup')">🚀 Landing</button>
+      </div>
+      <button class="build-btn" onclick="buildApp()">
+        <span>→</span> Build
+      </button>
     </div>
   </div>
 
-  <!-- APPS VIEW -->
-  <div class="editor-area" id="appsView" style="display:none;flex-direction:column">
-    <div style="padding:16px;border-bottom:1px solid var(--border)">
-      <div style="font-size:.9rem;font-weight:700">My Apps</div>
-      <div style="font-size:.73rem;color:var(--t2);margin-top:2px">Apps you've built</div>
-    </div>
-    <div style="padding:14px;overflow-y:auto" id="appsList">
-      <div style="text-align:center;color:var(--t3);font-size:.8rem;padding:40px 20px">
-        Build your first app! Use the chat below 👇
-      </div>
+  <!-- MY APPS -->
+  <div class="section-title">My Apps</div>
+  <div id="appsContainer">
+    <div class="empty">
+      <div class="empty-ico">🧠</div>
+      <h3>No apps yet</h3>
+      <p>Describe your idea above and build your first app!</p>
+      <button class="build-btn" onclick="document.getElementById('promptInput').focus()">Build First App →</button>
     </div>
   </div>
 
-  <!-- RIGHT PANEL -->
-  <div class="right-panel">
-    <div class="preview-hdr">
-      <div class="ph-tabs">
-        <button class="ph-tab active" onclick="switchPreview('desktop',this)">Desktop</button>
-        <button class="ph-tab" onclick="switchPreview('mobile',this)">Mobile</button>
-      </div>
-      <div style="display:flex;gap:4px">
-        <button class="icon-btn" onclick="refreshPreview()" title="Refresh">↻</button>
-        <button class="icon-btn" onclick="openInNew()" title="Open">↗</button>
-      </div>
-    </div>
-    <div class="preview-frame" id="previewFrame">
-      <div class="preview-empty">
-        <div class="pe-ico">👁️</div>
-        <div class="pe-txt">Your app preview will appear here</div>
-      </div>
-    </div>
-    <div class="chat-area">
-      <div class="chat-msgs" id="chatMsgs">
-        <div class="msg msg-ai">
-          <div class="msg-av">🧠</div>
-          <div class="msg-bubble">Hey! I'm Gyan AI 👋 Describe your app and I'll build it instantly ⚡</div>
-        </div>
-      </div>
-      <div class="chat-inp-area">
-        <textarea class="chat-inp" id="chatInp" placeholder="Describe your app or ask to change something..." rows="1" onkeydown="handleKey(event)"></textarea>
-        <button class="chat-send" onclick="sendMsg()">➤</button>
-      </div>
-    </div>
-  </div>
 </div>
 
-<!-- PUBLISH MODAL -->
-<div class="overlay" id="pubOverlay" onclick="closeOverlay('pubOverlay',event)">
-  <div class="modal">
-    <button class="mc" onclick="closeMod('pubOverlay')">✕</button>
-    <h2>🚀 Publish Your App</h2>
-    <p class="modal-sub">Choose a subdomain and go live instantly</p>
-    <div class="url-row">
-      <div class="url-pre">https://</div>
-      <input class="url-field" id="subInput" placeholder="yourname" oninput="checkSub(this.value)"/>
-      <div class="url-suf">.gyan-ai.tech</div>
-    </div>
-    <div class="url-status" id="subStatus"></div>
-    <button class="pub-final" onclick="publishApp()" id="pubBtn">🚀 Publish Now</button>
-  </div>
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="bn-item active"><div class="bn-ico">🏠</div><div class="bn-label">Home</div></div>
+  <div class="bn-item" onclick="window.location.href='dashboard.html'"><div class="bn-ico">📱</div><div class="bn-label">Apps</div></div>
+  <div class="bn-item" onclick="window.location.href='payment.html'"><div class="bn-ico">💎</div><div class="bn-label">Upgrade</div></div>
+  <div class="bn-item" onclick="logout()"><div class="bn-ico">👤</div><div class="bn-label">Account</div></div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="lmark" style="width:48px;height:48px;font-size:1.3rem">🧠</div>
+  <div class="spinner"></div>
+  <div class="loading-text">Building your app...</div>
+  <div class="loading-sub" id="loadingSub">Gyan AI is writing your code</div>
 </div>
 
 <script>
   const API = 'https://gyan-ai-backend.onrender.com';
-  let currentCode = '';
-  let isGenerating = false;
+  let user = null;
+  let apps = JSON.parse(localStorage.getItem('gyan_apps') || '[]');
 
-  // ── THEME ──
-  function toggleTheme(){
-    const h=document.documentElement;
-    const d=h.getAttribute('data-theme')==='dark';
-    h.setAttribute('data-theme',d?'light':'dark');
-    document.getElementById('tbt').textContent=d?'🌙':'☀️';
+  // ── INIT ──
+  window.onload = () => {
+    const token = localStorage.getItem('gyan_token');
+    if (!token) { window.location.href = 'auth.html'; return; }
+
+    try { user = JSON.parse(localStorage.getItem('gyan_user') || '{}'); } catch(e) {}
+
+    if (user?.name) {
+      const first = user.name.split(' ')[0];
+      document.getElementById('greetText').textContent = `Hi ${first}, What will you build next?`;
+      document.getElementById('navAvatar').textContent = first[0].toUpperCase();
+    }
+
+    if (user?.plan && user.plan !== 'free') {
+      document.getElementById('navPlan').textContent = user.plan;
+      document.getElementById('creditsBar').style.display = 'none';
+    }
+
+    const credits = user?.credits || 5;
+    document.getElementById('crVal').textContent = credits;
+    document.getElementById('crFill').style.width = (credits / 30 * 100) + '%';
+
+    renderApps();
+
+    // Check if came from homepage with prompt
+    const p = new URLSearchParams(window.location.search);
+    if (p.get('prompt')) {
+      document.getElementById('promptInput').value = decodeURIComponent(p.get('prompt'));
+      setTimeout(buildApp, 300);
+    }
+  };
+
+  // ── SET PROMPT ──
+  function setPrompt(text) {
+    document.getElementById('promptInput').value = text;
+    document.getElementById('promptInput').focus();
   }
 
-  // ── TABS ──
-  function switchTab(tab,btn){
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('buildView').style.display=tab==='build'?'flex':'none';
-    document.getElementById('appsView').style.display=tab==='apps'?'flex':'none';
-    document.querySelector('.right-panel').style.display=tab==='build'?'flex':'none';
-    if(tab==='build')document.getElementById('buildView').style.flexDirection='column';
+  // ── BUILD APP ──
+  async function buildApp() {
+    const prompt = document.getElementById('promptInput').value.trim();
+    if (!prompt) { document.getElementById('promptInput').focus(); return; }
+
+    const credits = user?.credits || 5;
+    if (user?.plan === 'free' && credits < 5) {
+      alert('Not enough credits! You need 5 credits. Upgrade to Premium for unlimited apps.');
+      return;
+    }
+
+    showLoading('Gyan AI is writing your code...');
+
+    try {
+      const token = localStorage.getItem('gyan_token');
+      const res = await fetch(API + '/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ prompt, userId: user?.id || 'demo' })
+      });
+      const data = await res.json();
+
+      if (data.code) {
+        saveAndOpenApp(prompt, data.code);
+      } else {
+        throw new Error(data.error || 'Generation failed');
+      }
+    } catch (e) {
+      updateLoading('Demo mode — generating...');
+      setTimeout(() => {
+        const demoCode = generateDemo(prompt);
+        saveAndOpenApp(prompt, demoCode);
+      }, 1500);
+    }
   }
 
-  // ── FILE SIDEBAR ──
-  function setFile(name,el){
-    document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
-    el.classList.add('active');
+  function saveAndOpenApp(prompt, code) {
+    const appId = 'app-' + Date.now();
+    const appName = generateAppName(prompt);
+    const newApp = {
+      id: appId,
+      name: appName,
+      prompt,
+      code,
+      status: 'draft',
+      createdAt: new Date().toISOString(),
+      emoji: getEmoji(prompt)
+    };
+    apps.unshift(newApp);
+    localStorage.setItem('gyan_apps', JSON.stringify(apps));
+
+    // Deduct credits
+    if (user?.plan === 'free') {
+      user.credits = Math.max(0, (user.credits || 5) - 5);
+      localStorage.setItem('gyan_user', JSON.stringify(user));
+    }
+
+    hideLoading();
+    document.getElementById('promptInput').value = '';
+
+    // Open app editor
+    localStorage.setItem('current_app', JSON.stringify(newApp));
+    window.location.href = 'app-detail.html?id=' + appId;
   }
 
-  // ── CHAT ──
-  function handleKey(e){
-    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}
+  // ── RENDER APPS ──
+  function renderApps() {
+    const container = document.getElementById('appsContainer');
+    if (apps.length === 0) {
+      container.innerHTML = `<div class="empty"><div class="empty-ico">🧠</div><h3>No apps yet</h3><p>Describe your idea above and build your first app!</p><button class="build-btn" onclick="document.getElementById('promptInput').focus()" style="margin:0 auto">Build First App →</button></div>`;
+      return;
+    }
+    container.innerHTML = `<div class="apps-grid">${apps.map(app => `
+      <div class="app-card" onclick="openApp('${app.id}')">
+        <div class="app-thumb">${app.emoji || '🧠'}</div>
+        <div class="app-body">
+          <div class="app-name">${app.name}</div>
+          <div class="app-url">${app.subdomain ? app.subdomain + '.gyan-ai.tech' : 'Not published'}</div>
+          <div class="app-footer">
+            <div class="app-status"><div class="status-dot"></div>${app.status === 'live' ? 'Live' : 'Draft'}</div>
+            <div class="app-date">${formatDate(app.createdAt)}</div>
+          </div>
+          <div class="app-actions">
+            <button class="app-btn" onclick="event.stopPropagation();openApp('${app.id}')">✏️ Edit</button>
+            <button class="app-btn primary" onclick="event.stopPropagation();openApp('${app.id}')">🚀 Open</button>
+          </div>
+        </div>
+      </div>`).join('')}</div>`;
   }
 
-  async function sendMsg(){
-    if(isGenerating)return;
-    const inp=document.getElementById('chatInp');
-    const msg=inp.value.trim();
-    if(!msg)return;
-    inp.value='';
-    inp.style.height='32px';
+  function openApp(id) {
+    const app = apps.find(a => a.id === id);
+    if (!app) return;
+    localStorage.setItem('current_app', JSON.stringify(app));
+    window.location.href = 'app-detail.html?id=' + id;
+  }
 
-    addMsg('user',msg);
-    isGenerating=true;
+  // ── DEMO GENERATOR ──
+  function generateDemo(prompt) {
+    const p = prompt.toLowerCase();
+    let title = 'My App', color = '#5b5cf6', icon = '🧠', content = '';
+    if (p.includes('shop') || p.includes('store')) { title = 'My Shop'; color = '#e8407a'; icon = '🛒'; content = '<div class="card"><h2>Featured Product</h2><p style="color:#888;margin:8px 0">Premium Quality Item</p><div style="font-size:1.4rem;font-weight:800;color:#e8407a;margin:8px 0">₹999</div><button style="background:#e8407a;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600">Add to Cart</button></div>'; }
+    else if (p.includes('portfolio')) { title = 'My Portfolio'; color = '#0891b2'; icon = '👨‍💻'; content = '<div class="card"><h2>Frontend Developer</h2><p style="color:#888;margin:8px 0">I build beautiful web apps</p><div style="display:flex;gap:8px;margin-top:12px"><span style="background:#e8f8ff;color:#0891b2;padding:4px 10px;border-radius:6px;font-size:.78rem">React</span><span style="background:#e8f8ff;color:#0891b2;padding:4px 10px;border-radius:6px;font-size:.78rem">Node.js</span></div></div>'; }
+    else if (p.includes('restaurant')) { title = 'Restaurant Menu'; color = '#f59e0b'; icon = '🍽️'; content = '<div class="card"><h2>Today\'s Special</h2><p style="color:#888;margin:8px 0">Dal Makhani + Naan</p><div style="font-size:1.2rem;font-weight:700;color:#f59e0b;margin:8px 0">₹299</div><button style="background:#f59e0b;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600">Order Now</button></div>'; }
+    else if (p.includes('blog')) { title = 'My Blog'; color = '#16a34a'; icon = '📝'; content = '<div class="card"><h2>Latest Post</h2><p style="color:#888;margin:8px 0">How I built an app in 4 days using AI...</p><button style="background:#16a34a;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600">Read More →</button></div>'; }
+    else if (p.includes('task') || p.includes('workflow')) { title = 'Task Manager'; color = '#7c3aed'; icon = '📋'; content = '<div class="card"><h2>My Tasks</h2><div style="margin-top:12px"><div style="padding:8px;background:#f0f0ff;border-radius:8px;margin-bottom:6px;display:flex;align-items:center;gap:8px"><span>✅</span><span style="text-decoration:line-through;color:#888">Design homepage</span></div><div style="padding:8px;background:#f0f0ff;border-radius:8px;margin-bottom:6px;display:flex;align-items:center;gap:8px"><span>⏳</span><span>Build backend</span></div><div style="padding:8px;background:#f0f0ff;border-radius:8px;display:flex;align-items:center;gap:8px"><span>📌</span><span>Launch app</span></div></div></div>'; }
+    else { content = '<div class="card"><h2>Welcome!</h2><p style="color:#888;margin:8px 0">Your app is ready to use</p><button style="background:#5b5cf6;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600">Get Started</button></div>'; }
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,sans-serif;background:#f8f8fc;color:#0c0c1d;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}header{background:${color};color:#fff;padding:16px 20px;border-radius:16px;margin-bottom:20px;text-align:center;width:100%;max-width:380px}header h1{font-size:1.4rem;font-weight:800}.card{background:#fff;border-radius:16px;padding:24px;max-width:380px;width:100%;box-shadow:0 4px 20px rgba(0,0,0,0.08);text-align:center}.card h2{font-size:1.1rem;font-weight:700;margin-bottom:4px}.badge{margin-top:20px;font-size:.68rem;color:#bbb}a{color:${color}}</style></head><body><header><h1>${icon} ${title}</h1><p style="font-size:.82rem;opacity:.85;margin-top:4px">Built with Gyan AI</p></header>${content}<p class="badge">🧠 gyan-ai.tech</p></body></html>`;
+  }
 
-    // Show building message
-    const thi
+  // ── HELPERS ──
+  function generateAppName(prompt) {
+    const p = prompt.toLowerCase();
+    if (p.includes('shop') || p.includes('store')) return 'My Shop';
+    if (p.includes('portfolio')) 
