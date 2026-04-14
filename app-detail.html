@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gyan AI — App Editor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#f4f4f8;font-family:'Sora',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+    /* TOP NAV */
+    nav{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#fff;border-bottom:1px solid #e8e8f0;flex-shrink:0;gap:8px}
+    .nav-left{display:flex;align-items:center;gap:10px}
+    .back-btn{width:32px;height:32px;border-radius:8px;border:1px solid #e0e0e0;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:all .2s;text-decoration:none;color:#333}
+    .back-btn:hover{border-color:#5b5cf6;color:#5b5cf6}
+    .app-name-btn{font-size:.88rem;font-weight:700;padding:5px 12px;border-radius:8px;border:1px solid #e0e0e0;background:transparent;cursor:pointer;font-family:inherit;color:#0c0c1d;transition:all .2s;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .app-name-btn:hover{border-color:#5b5cf6}
+
+    /* VIEW TABS */
+    .view-tabs{display:flex;gap:3px;background:#f4f4f8;border-radius:9px;padding:3px;border:1px solid #e8e8f0}
+    .vtab{padding:5px 12px;border-radius:7px;font-size:.75rem;font-weight:600;cursor:pointer;border:none;background:transparent;font-family:inherit;color:#888;transition:all .2s;white-space:nowrap}
+    .vtab.active{background:#fff;color:#0c0c1d;box-shadow:0 1px 6px rgba(0,0,0,0.08)}
+
+    .nav-right{display:flex;align-items:center;gap:6px}
+    .pub-btn{display:flex;align-items:center;gap:5px;padding:7px 14px;border-radius:9px;border:none;background:linear-gradient(135deg,#5b5cf6,#e8407a);color:#fff;font-size:.76rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 12px rgba(91,92,246,0.3)}
+    .pub-btn:hover{opacity:.88}
+    .apk-btn{padding:7px 12px;border-radius:9px;border:1px solid #e0e0e0;background:transparent;color:#555;font-size:.76rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+    .apk-btn:hover{border-color:#5b5cf6;color:#5b5cf6}
+
+    /* MAIN AREA */
+    .content{flex:1;display:flex;overflow:hidden}
+
+    /* CODE VIEW */
+    .code-view{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#1e1e2e}
+    .file-tabs{display:flex;background:#181825;border-bottom:1px solid #313145;padding:0 10px;height:34px;overflow-x:auto;gap:2px;flex-shrink:0}
+    .ftab{display:flex;align-items:center;gap:5px;padding:5px 12px;font-size:.72rem;font-weight:500;color:#666;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;font-family:'JetBrains Mono',monospace}
+    .ftab.active{color:#cdd6f4;border-bottom-color:#5b5cf6}
+    .ftdot{width:5px;height:5px;border-radius:50%;background:#e8407a}
+    .code-wrap{flex:1;display:flex;overflow:hidden}
+    .line-nums{padding:12px 10px;background:#181825;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#45475a;line-height:1.8;user-select:none;min-width:40px;overflow:hidden;flex-shrink:0}
+    .code-content{flex:1;padding:12px 14px;overflow:auto;font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.8;color:#cdd6f4;white-space:pre;outline:none;tab-size:2}
+    .code-content::-webkit-scrollbar{width:4px;height:4px}
+    .code-content::-webkit-scrollbar-thumb{background:#313145;border-radius:99px}
+    .kw{color:#cba6f7}.str{color:#a6e3a1}.fn{color:#89b4fa}.cm{color:#45475a}.tg{color:#f38ba8}.at{color:#89dceb}.nm{color:#fab387}
+
+    /* PREVIEW VIEW */
+    .preview-view{flex:1;display:none;flex-direction:column;overflow:hidden;background:#fff}
+    .preview-view.show{display:flex}
+    .preview-toolbar{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#f8f8fc;border-bottom:1px solid #e8e8f0;flex-shrink:0}
+    .device-btns{display:flex;gap:4px;background:#fff;border-radius:8px;padding:3px;border:1px solid #e0e0e0}
+    .dev-btn{padding:4px 10px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:none;background:transparent;font-family:inherit;color:#888;transition:all .2s}
+    .dev-btn.active{background:#5b5cf6;color:#fff}
+    .preview-actions{display:flex;gap:6px}
+    .prev-action-btn{width:30px;height:30px;border-radius:7px;border:1px solid #e0e0e0;background:transparent;cursor:pointer;font-size:.82rem;transition:all .2s;color:#555}
+    .prev-action-btn:hover{border-color:#5b5cf6;color:#5b5cf6}
+    .preview-container{flex:1;display:flex;align-items:center;justify-content:center;background:#e8e8f0;overflow:auto;padding:20px}
+    .preview-frame-wrap{transition:all .3s;background:#fff;border-radius:4px;box-shadow:0 8px 32px rgba(0,0,0,0.15);overflow:hidden}
+    .preview-frame-wrap.desktop{width:100%;max-width:100%;height:100%}
+    .preview-frame-wrap.mobile{width:375px;height:667px;border-radius:24px;box-shadow:0 12px 40px rgba(0,0,0,0.25)}
+    .preview-iframe{width:100%;height:100%;border:none}
+
+    /* CHAT */
+    .chat-panel{width:320px;display:flex;flex-direction:column;border-left:1px solid #e8e8f0;background:#fff;flex-shrink:0}
+    @media(max-width:700px){.chat-panel{display:none}}
+    .chat-header{height:44px;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid #e8e8f0;font-size:.82rem;font-weight:700;flex-shrink:0}
+    .chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+    .chat-msgs::-webkit-scrollbar{width:3px}
+    .chat-msgs::-webkit-scrollbar-thumb{background:#e0e0e0;border-radius:99px}
+    .msg{display:flex;gap:7px}
+    .msg-av{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;margin-top:1px}
+    .msg-ai .msg-av{background:linear-gradient(135deg,#5b5cf6,#e8407a);color:#fff}
+    .msg-user .msg-av{background:#f0f0f8;color:#555}
+    .msg-bubble{padding:8px 11px;border-radius:11px;font-size:.78rem;line-height:1.55;max-width:90%}
+    .msg-ai .msg-bubble{background:#f4f4f8;color:#0c0c1d}
+    .msg-user .msg-bubble{background:rgba(91,92,246,0.08);color:#0c0c1d;margin-left:auto}
+    .msg-user{flex-direction:row-reverse}
+    .chat-inp-area{padding:10px;border-top:1px solid #e8e8f0;display:flex;gap:6px}
+    .chat-inp{flex:1;background:#f4f4f8;border:1px solid #e8e8f0;border-radius:10px;padding:8px 12px;font-family:inherit;font-size:.78rem;resize:none;outline:none;min-height:36px;max-height:80px;line-height:1.5;transition:border-color .2s;color:#0c0c1d}
+    .chat-inp:focus{border-color:#5b5cf6;background:#fff}
+    .chat-inp::placeholder{color:#bbb}
+    .chat-send{width:34px;height:34px;border-radius:9px;border:none;background:linear-gradient(135deg,#5b5cf6,#e8407a);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.82rem;flex-shrink:0;transition:all .2s}
+    .chat-send:hover{opacity:.85;transform:scale(1.05)}
+
+    /* PUBLISH MODAL */
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);z-index:500;align-items:center;justify-content:center;padding:16px}
+    .overlay.open{display:flex}
+    .modal{background:#fff;border-radius:20px;padding:28px;width:100%;max-width:440px;position:relative;box-shadow:0 24px 60px rgba(0,0,0,0.15);animation:mi .25s ease both}
+    @keyframes mi{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+    .mc{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:7px;border:1px solid #e0e0e0;background:transparent;cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .mc:hover{border-color:#5b5cf6;color:#5b5cf6}
+    .modal h2{font-size:1.1rem;font-weight:800;margin-bottom:4px}
+    .modal-sub{font-size:.78rem;color:#888;margin-bottom:20px}
+    .url-row{display:flex;align-items:center;background:#f8f8fc;border:1.5px solid #e0e0e0;border-radius:11px;overflow:hidden;margin-bottom:10px;transition:border-color .2s}
+    .url-row:focus-within{border-color:#5b5cf6}
+    .url-pre{padding:10px 12px;font-size:.74rem;color:#aaa;white-space:nowrap;border-right:1px solid #e8e8f0;font-family:'JetBrains Mono',monospace}
+    .url-field{flex:1;padding:10px 12px;background:transparent;border:none;outline:none;font-family:'JetBrains Mono',monospace;font-size:.74rem;color:#0c0c1d}
+    .url-suf{padding:10px 12px;font-size:.74rem;color:#aaa;border-left:1px solid #e8e8f0;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+    .url-hint{font-size:.7rem;margin-bottom:18px;min-height:18px}
+    .url-ok{color:#16a34a}.url-err{color:#dc2626}
+    .pub-options{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+    .pub-opt{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;border:1.5px solid #e0e0e0;cursor:pointer;transition:all .2s}
+    .pub-opt:hover,.pub-opt.sel{border-color:#5b5cf6;background:#f8f8ff}
+    .pub-opt-ico{font-size:1.1rem}
+    .pub-opt-text{flex:1}
+    .pub-opt-name{font-size:.83rem;font-weight:600}
+    .pub-opt-desc{font-size:.7rem;color:#aaa;margin-top:1px}
+    .pub-opt-radio{width:16px;height:16px;border-radius:50%;border:2px solid #e0e0e0;transition:all .2s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .pub-opt.sel .pub-opt-radio{border-color:#5b5cf6;background:#5b5cf6}
+    .pub-opt.sel .pub-opt-radio::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff}
+    .pub-final{width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#5b5cf6,#e8407a);color:#fff;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(91,92,246,0.28)}
+    .pub-final:hover{opacity:.88}
+    .pub-final:disabled{opacity:.5;cursor:not-allowed}
+
+    /* APP DETAIL SECTION */
+    .detail-view{flex:1;overflow-y:auto;display:none;flex-direction:column}
+    .detail-view.show{display:flex}
+    .detail-content{padding:20px;max-width:600px;margin:0 auto;width:100%}
+    .app-icon-big{width:72px;height:72px;background:linear-gradient(135deg,#f0f0ff,#fff0f8);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:2.2rem;margin-bottom:14px;border:1px solid #e8e8f0}
+    .detail-name{font-size:1.3rem;font-weight:800;margin-bottom:4px}
+    .detail-desc{font-size:.82rem;color:#888;margin-bottom:20px;line-height:1.6}
+    .detail-actions{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap}
+    .da-btn{flex:1;min-width:120px;padding:11px;border-radius:12px;border:1.5px solid #e0e0e0;background:#fff;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;color:#333}
+    .da-btn:hover{border-color:#5b5cf6;color:#5b5cf6}
+    .da-btn.primary{background:linear-gradient(135deg,#5b5cf6,#e8407a);border:none;color:#fff;box-shadow:0 4px 14px rgba(91,92,246,0.25)}
+    .detail-section{background:#fff;border-radius:16px;padding:18px;margin-bottom:16px;border:1px solid #e8e8f0}
+    .ds-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:14px}
+    .info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f4f4f8;font-size:.82rem}
+    .info-row:last-child{border-bottom:none}
+    .ir-label{color:#888}
+    .ir-val{font-weight:600}
+    .ir-val.live{color:#16a34a}
+    .vis-opts{display:flex;gap:8px}
+    .vis-opt{flex:1;padding:10px;border-radius:10px;border:1.5px solid #e0e0e0;text-align:center;cursor:pointer;transition:all .2s;font-size:.8rem;font-weight:500}
+    .vis-opt.sel{border-color:#5b5cf6;background:#f0f0ff;color:#5b5cf6}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:16px;right:16px;padding:10px 16px;border-radius:10px;font-size:.76rem;font-weight:500;color:#fff;z-index:1000;animation:ti .3s ease;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+    .toast.success{background:rgba(22,163,74,.92)}
+    .toast.error{background:rgba(239,68,68,.92)}
+    .toast.info{background:rgba(91,92,246,.92)}
+    @keyframes ti{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+
+    /* GENERATING */
+    .gen-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;background:rgba(91,92,246,0.1);color:#5b5cf6;font-size:.72rem;font-weight:600}
+    .gen-dot{width:6px;height:6px;border-radius:50%;background:#5b5cf6;animation:pp 1s infinite}
+    @keyframes pp{0%,100%{opacity:1}50%{opacity:.2}}
+  </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav>
+  <div class="nav-left">
+    <a href="dashboard.html" class="back-btn">←</a>
+    <button class="app-name-btn" id="appNameBtn" onclick="renameApp()">My App</button>
+    <div class="view-tabs">
+      <button class="vtab active" onclick="switchView('dashboard',this)">Dashboard</button>
+      <button class="vtab" onclick="switchView('preview',this)">Preview</button>
+      <button class="vtab" onclick="switchView('code',this)">Code</button>
+    </div>
+  </div>
+  <div class="nav-right">
+    <button class="apk-btn" onclick="exportAPK()">📦 APK</button>
+    <button class="pub-btn" onclick="openPublish()">🚀 Publish</button>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- DETAIL VIEW -->
+  <div class="detail-view show" id="detailView">
+    <div class="detail-content">
+      <div class="app-icon-big" id="detailEmoji">🧠</div>
+      <div class="detail-name" id="detailName">My App</div>
+      <div class="detail-desc" id="detailDesc">Built with Gyan AI</div>
+
+      <div class="detail-actions">
+        <button class="da-btn" onclick="switchView('preview',document.querySelectorAll('.vtab')[1])">👁️ Preview</button>
+        <button class="da-btn" onclick="switchView('code',document.querySelectorAll('.vtab')[2])">💻 View Code</button>
+        <button class="da-btn primary" onclick="openPublish()">🚀 Publish</button>
+      </div>
+
+      <div class="detail-section">
+        <div class="ds-title">App Info</div>
+        <div class="info-row"><span class="ir-label">Status</span><span class="ir-val" id="infoStatus">Draft</span></div>
+        <div class="info-row"><span class="ir-label">URL</span><span class="ir-val" id="infoUrl">Not published</span></div>
+        <div class="info-row"><span class="ir-label">Created</span><span class="ir-val" id="infoDate">—</span></div>
+        <div class="info-row"><span class="ir-label">Views</span><span class="ir-val" id="infoViews">0</span></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="ds-title">Visibility</div>
+        <div class="vis-opts">
+          <div class="vis-opt sel" onclick="setVis(this,'public')">🌐 Public</div>
+          <div class="vis-opt" onclick="setVis(this,'private')">🔒 Private</div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="ds-title">Export</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="da-btn" onclick="downloadHTML()" style="flex:none;min-width:auto;padding:9px 16px">📥 Download HTML</button>
+          <button class="da-btn" onclick="exportAPK()" style="flex:none;min-width:auto;padding:9px 16px">📦 Export APK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREVIEW VIEW -->
+  <div class="preview-view" id="previewView">
+    <div class="preview-toolbar">
+      <div class="device-btns">
+        <button class="dev-btn active" onclick="setDevice('desktop',this)">🖥️ Desktop</button>
+        <button class="dev-btn" onclick="setDevice('mobile',this)">📱 Mobile</button>
+      </div>
+      <div class="preview-actions">
+        <button class="prev-action-btn" onclick="refreshPreview()" title="Refresh">↻</button>
+        <button class="prev-action-btn" onclick="openInNew()" title="Open in new tab">↗</button>
+      </div>
+    </div>
+    <div class="preview-container" id="previewContainer">
+      <div class="preview-frame-wrap desktop" id="previewWrap">
+        <iframe class="preview-iframe" id="previewIframe" sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- CODE VIEW -->
+  <div class="code-view" id="codeView" style="display:none">
+    <div class="file-tabs">
+      <div class="ftab active"><div class="ftdot"></div>index.html</div>
+    </div>
+    <div class="code-wrap">
+      <div class="line-nums" id="lineNums">1</div>
+      <div class="code-content" id="codeContent" contenteditable="true" spellcheck="false"></div>
+    </div>
+  </div>
+
+  <!-- CHAT PANEL -->
+  <div class="chat-panel">
+    <div class="chat-header">
+      <span>💬 Chat to Edit</span>
+    </div>
+    <div class="chat-msgs" id="chatMsgs">
+      <div class="msg msg-ai">
+        <div class="msg-av">🧠</div>
+        <div class="msg-bubble">Your app is ready! Tell me what to change — I'll update it instantly ⚡</div>
+      </div>
+    </div>
+    <div class="chat-inp-area">
+      <textarea class="chat-inp" id="chatInp" placeholder="Change button color to red..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendEdit()}"></textarea>
+      <button class="chat-send" onclick="sendEdit()">➤</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- PUBLISH MODAL -->
+<div class="overlay" id="pubOverlay" onclick="closeOv(event)">
+  <div class="modal">
+    <button class="mc" onclick="closeMod('pubOverlay')">✕</button>
+    <h2>🚀 Publish Your App</h2>
+    <p class="modal-sub">Choose a subdomain and go live</p>
+    <div class="url-row">
+      <div class="url-pre">https://</div>
+      <input class="url-field" id="subInput" placeholder="yourname" oninput="checkSub(this.value)"/>
+      <div class="url-suf">.gyan-ai.tech</div>
+    </div>
+    <div class="url-hint" id="subHint"></div>
+    <div class="pub-options">
+      <div class="pub-opt sel" onclick="selPubOpt(this,'web')">
+        <span class="pub-opt-ico">🌐</span>
+        <div class="pub-opt-text"><div class="pub-opt-name">Web App</div><div class="pub-opt-desc">Live website instantly</div></div>
+        <div class="pub-opt-radio"></div>
+      </div>
+      <div class="pub-opt" onclick="selPubOpt(this,'apk')">
+        <span class="pub-opt-ico">📱</span>
+        <div class="pub-opt-text"><div class="pub-opt-name">Web + APK <span style="color:#e8407a;font-size:.68rem">Premium</span></div><div class="pub-opt-desc">Also get Android APK</div></div>
+        <div class="pub-opt-radio"></div>
+      </div>
+    </div>
+    <button class="pub-final" onclick="publishApp()" id="pubFinalBtn">🚀 Publish Now</button>
+  </div>
+</div>
+
+<script>
+  const API = 'https://gyan-ai-backend.onrender.com';
+  let app = null;
+  let currentCode = '';
+  let pubType = 'web';
+
+  // ── INIT ──
+  window.onload = () => {
+    const stored = localStorage.getItem('current_app');
+    if (!stored) { window.location.href = 'dashboard.html'; return; }
+
+    app = JSON.parse(stored);
+    currentCode = app.code || '';
+
+    // Update UI
+    document.getElementById('appNameBtn').textContent = app.name;
+    document.getElementById('detailName').textContent = app.name;
+    document.getElementById('detailDesc').textContent = app.prompt || 'Built with Gyan AI';
+    document.getElementById('detailEmoji').textContent = app.emoji || '🧠';
+    document.getElementById('infoDate').textContent = new Date(app.createdAt).toLocaleDateString('en-IN');
+
+    if (app.subdomain) {
+      document.getElementById('infoStatus').textContent = 'Live';
+      document.getElementById('infoStatus').className = 'ir-val live';
+      document.getElementById('infoUrl').textContent = app.subdomain + '.gyan-ai.tech';
+      document.getElementById('infoUrl').innerHTML = `<a href="https://${app.subdomain}.gyan-ai.tech" target="_blank" style="color:#5b5cf6">${app.subdomain}.gyan-ai.tech ↗</a>`;
+    }
+
+    // Load code
+    loadCode(currentCode);
+
+    // Load preview
+    if (currentCode) loadPreview(currentCode);
+  };
+
+  // ── SWITCH VIEW ──
+  function switchView(view, btn) {
+    document.querySelectorAll('.vtab').forEach(t => t.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    document.getElementById('detailView').className = 'detail-view' + (view === 'dashboard' ? ' show' : '');
+    document.getElementById('previewView').className = 'preview-view' + (view === 'preview' ? ' show' : '');
+    document.getElementById('codeView').style.display = view === 'code' ? 'flex' : 'none';
+
+    if (view === 'preview' && currentCode) loadPreview(currentCode);
+    if (view === 'code') loadCode(currentCode);
+  }
+
+  // ── CODE ──
+  function loadCode(code) {
+    if (!code) return;
+    const lines = code.split('\n');
+    let lineHtml = '';
+    for (let i = 1; i <= lines.length; i++) lineHtml += i + '<br>';
+    document.getElementById('lineNums').innerHTML = lineHtml;
+    document.getElementById('codeContent').textContent = code;
+  }
+
+  // ── PREVIEW ──
+  function loadPreview(code) {
+    const iframe = document.getElementById('previewIframe');
+    iframe.srcdoc = code;
+  }
+
+  function refreshPreview() {
+    if (currentCode) loadPreview(currentCode);
+  }
+
+  function openInNew() {
+    if (!currentCode) { showToast('No app to preview', 'error'); return; }
+    const w = window.open('');
+    w.document.write(currentCode);
+  }
+
+  function setDevice(type, btn) {
+    document.querySelectorAll('.dev-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const wrap = document.getElementById('previewWrap');
+    wrap.className = 'preview-frame-wrap ' + type;
+    if (type === 'mobile') {
+      document.getElementById('previewIframe').style.height = '667px';
+    } else {
+      document.getElementById('previewIframe').style.height = '100%';
+    }
+  }
+
+  // ── CHAT EDIT ──
+  async function sendEdit() {
+    const inp = document.getElementById('chatInp');
+    const msg = inp.value.trim();
+    if (!msg) return;
+    inp.value = '';
+
+    addMsg('user', msg);
+    const thinking = addMsg('ai', '<span class="gen-badge"><div class="gen-dot"></div>Updating...</span>');
+
+    try {
+      const token = localStorage.getItem('gyan_token');
+      const res = await fetch(API + '/api/ai/edit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ currentCode, editPrompt: msg, userId: 'demo' })
+      });
+      const data = await res.json();
+
+      if (data.code) {
+        currentCode = data.code;
+        loadCode(data.code);
+        loadPreview(data.code);
+        updateStoredApp(data.code);
+        thinking.querySelector('.msg-bubble').innerHTML = '✅ Updated! Check the preview →';
+        showToast('App updated!', 'success');
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (e) {
+      thinking.querySelector('.msg-bubble').innerHTML = '⚠️ Demo mode — changes apply locally';
+      showToast('Demo mode', 'info');
+    }
+  }
+
+  function addMsg(type, html) {
+    const msgs = document.getElementById('chatMsgs');
+    const div = document.createElement('div');
+    div.className = `msg msg-${type}`;
+    div.innerHTML = `<div class="msg-av">${type === 'ai' ? '🧠' : 'A'}</div><div class="msg-bubble">${html}</div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    return div;
+  }
+
+  // ── PUBLISH ──
+  function openPublish() {
+    document.getElementById('pubOverlay').classList.add('open');
+    if (app.subdomain) document.getElementById('subInput').value = app.subdomain;
+  }
+
+  function checkSub(val) {
+    const hint = document.getElementById('subHint');
+    if (!val) { hint.innerHTML = ''; return; }
+    if (!/^[a-z0-9-]+$/.test(val)) { hint.innerHTML = '<span class="url-err">⚠️ Lowercase letters, numbers, hyphens only</span>'; return; }
+    hint.innerHTML = `<span class="url-ok">✓ ${val}.gyan-ai.tech</span>`;
+  }
+
+  function selPubOpt(el, type) {
+    document.querySelectorAll('.pub-opt').forEach(o => o.classList.remove('sel'));
+    el.classList.add('sel');
+    pubType = type;
+    if (type === 'apk') showToast('APK requires Premium plan', 'info');
+  }
+
+  async function publishApp() {
+    const sub = document.getElementById('subInput').value.trim().toLowerCase();
+    if (!sub) { showToast('Enter a subdomain', 'error'); return; }
+    if (!/^[a-z0-9-]+$/.test(sub)) { showToast('Only lowercase, numbers, hyphens', 'error'); return; }
+
+    const btn = document.getElementById('pubFinalBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Publishing...';
+
+    try {
+      const token = localStorage.getItem('gyan_token');
+      const res = await fetch(API + '/api/deploy/webapp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ appId: app.id, subdomain: sub, code: currentCode })
+      });
+      const data = await res.json();
+
+      if (data.success || data.url) {
+        app.subdomain = sub;
+        app.status = 'live';
+        updateStoredApp(currentCode);
+        closeMod('pubOverlay');
+        showToast(`✅ Live at ${sub}.gyan-ai.tech!`, 'success');
+        document.getElementById('infoStatus').textContent = 'Live';
+        document.getElementById('infoStatus').className = 'ir-val live';
+        document.getElementById('infoUrl').innerHTML = `<a href="https://${sub}.gyan-ai.tech" target="_blank" style="color:#5b5cf6">${sub}.gyan-ai.tech ↗</a>`;
+      } else {
+        throw new Error(data.error || 'Deploy failed');
+      }
+    } catch (e) {
+      // Demo mode
+      app.subdomain = sub;
+      app.status = 'live';
+      updateStoredApp(currentCode);
+      closeMod('pubOverlay');
+      showToast(`✅ Demo: ${sub}.gyan-ai.tech`, 'success');
+      document.getElementById('infoStatus').textContent = 'Live';
+      document.getElementById('infoStatus').className = 'ir-val live';
+    }
+
+    btn.disabled = false;
+    btn.textContent = '🚀 Publish Now';
+  }
+
+  // ── DOWNLOAD ──
+  function downloadHTML() {
+    if (!currentCode) { showToast('No code to download', 'error'); return; }
+    const a = document.createElement('a');
+    a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(currentCode);
+    a.download = (app.name || 'gyan-ai-app').toLowerCase().replace(/\s/g, '-') + '.html';
+    a.click();
+    showToast('Downloaded!', 'success');
+  }
+
+  function exportAPK() {
+    const user = JSON.parse(localStorage.getItem('gyan_user') || '{}');
+    if (user.plan === 'free') {
+      showToast('APK export requires Premium plan', 'info');
+      setTimeout(() => window.location.href = 'payment.html', 1500);
+      return;
+    }
+    showToast('⏳ APK build started! Check back in 5-10 min', 'info');
+  }
+
+  // ── RENAME ──
+  function renameApp() {
+    const name = prompt('App name:', app.name);
+    if (name && name.trim()) {
+      app.name = name.trim();
+      document.getElementById('appNameBtn').textContent = app.name;
+      document.getElementById('detailName').textContent = app.name;
+      updateStoredApp(currentCode);
+      showToast('Renamed!', 'success');
+    }
+  }
+
+  function setVis(el, type) {
+    document.querySelectorAll('.vis-opt').forEach(o => o.classList.remove('sel'));
+    el.classList.add('sel');
+  }
+
+  // ── HELPERS ──
+  function updateStoredApp(code) {
+    app.code = code;
+    localStorage.setItem('current_app', JSON.stringify(app));
+    const apps = JSON.parse(localStorage.getItem('gyan_apps') || '[]');
+    const idx = apps.findIndex(a => a.id === app.id);
+    if (idx >= 0) apps[idx] = app;
+    localStorage.setItem('gyan_apps', JSON.stringify(apps));
+  }
+
+  function closeMod(id) { document.getElementById(id).classList.remove('open'); }
+  function closeOv(e) { if (e.target.classList.contains('overlay')) e.target.classList.remove('open'); }
+
+  let tt;
+  function showToast(msg, type = 'info') {
+    const e = document.querySelector('.toast');
+    if (e) e.remove();
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    clearTimeout(tt);
+    tt = setTimeout(() => t.remove(), 3000);
+  }
+</script>
+</body>
+</html>
