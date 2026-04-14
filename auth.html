@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gyan AI — Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#f4f4f8;font-family:'Sora',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .card{background:#fff;border-radius:24px;padding:36px 32px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,0.1)}
+    .logo{display:flex;align-items:center;gap:8px;margin-bottom:28px;justify-content:center}
+    .lmark{width:36px;height:36px;background:linear-gradient(135deg,#5b5cf6,#e8407a);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+    .logo-txt{font-size:1.2rem;font-weight:800}
+    h2{font-size:1.4rem;font-weight:800;text-align:center;margin-bottom:6px}
+    .sub{font-size:.82rem;color:#666;text-align:center;margin-bottom:24px}
+    .tabs{display:flex;gap:4px;background:#f4f4f8;border-radius:10px;padding:4px;margin-bottom:24px}
+    .tab{flex:1;padding:8px;border-radius:7px;font-size:.8rem;font-weight:600;cursor:pointer;border:none;background:transparent;font-family:inherit;color:#666;transition:all .2s}
+    .tab.active{background:#fff;color:#5b5cf6;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+    .field{margin-bottom:14px}
+    .field label{display:block;font-size:.75rem;font-weight:600;color:#444;margin-bottom:5px}
+    .field input{width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid #e0e0e0;background:#fafafa;font-family:inherit;font-size:.88rem;outline:none;transition:border-color .2s;color:#0c0c1d}
+    .field input:focus{border-color:#5b5cf6;background:#fff}
+    .field input::placeholder{color:#aaa}
+    .btn{width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#5b5cf6,#e8407a);color:#fff;font-size:.92rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:6px;transition:all .2s;box-shadow:0 4px 16px rgba(91,92,246,0.25)}
+    .btn:hover{opacity:.88;transform:scale(1.01)}
+    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .divider{display:flex;align-items:center;gap:10px;margin:18px 0;color:#aaa;font-size:.72rem}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:#e8e8e8}
+    .social-btn{width:100%;padding:11px;border-radius:11px;border:1.5px solid #e0e0e0;background:#fff;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;transition:all .2s;color:#333}
+    .social-btn:hover{border-color:#5b5cf6;background:#f8f8ff}
+    .terms{font-size:.7rem;color:#aaa;text-align:center;margin-top:16px;line-height:1.5}
+    .terms a{color:#5b5cf6;text-decoration:none}
+    .error{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:9px 12px;font-size:.76rem;color:#dc2626;margin-bottom:12px;display:none}
+    .error.show{display:block}
+    .success{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:9px 12px;font-size:.76rem;color:#16a34a;margin-bottom:12px;display:none}
+    .success.show{display:block}
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="lmark">🧠</div>
+    <div class="logo-txt">Gyan AI</div>
+  </div>
+
+  <h2 id="cardTitle">Welcome back</h2>
+  <p class="sub" id="cardSub">Sign in to start building apps</p>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('login',this)">Sign In</button>
+    <button class="tab" onclick="switchTab('signup',this)">Sign Up</button>
+  </div>
+
+  <div class="error" id="errorMsg"></div>
+  <div class="success" id="successMsg"></div>
+
+  <!-- LOGIN FORM -->
+  <div id="loginForm">
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="your@email.com"/>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Enter your password" onkeydown="if(event.key==='Enter')login()"/>
+    </div>
+    <button class="btn" onclick="login()" id="loginBtn">Sign In →</button>
+  </div>
+
+  <!-- SIGNUP FORM -->
+  <div id="signupForm" style="display:none">
+    <div class="field">
+      <label>Your Name</label>
+      <input type="text" id="signupName" placeholder="Ashutosh Singh"/>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="signupEmail" placeholder="your@email.com"/>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="signupPass" placeholder="Min 6 characters"/>
+    </div>
+    <button class="btn" onclick="signup()" id="signupBtn">Create Account →</button>
+  </div>
+
+  <div class="divider"><span>or continue with</span></div>
+
+  <button class="social-btn" onclick="githubLogin()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+    Continue with GitHub
+  </button>
+
+  <div class="terms">By continuing you agree to our <a href="#">Terms</a> & <a href="#">Privacy Policy</a></div>
+</div>
+
+<script>
+  const API = 'https://gyan-ai-backend.onrender.com';
+
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
+    document.getElementById('cardTitle').textContent = tab === 'login' ? 'Welcome back' : 'Create account';
+    document.getElementById('cardSub').textContent = tab === 'login' ? 'Sign in to start building' : 'Join 5000+ builders on Gyan AI';
+    hideMessages();
+  }
+
+  function showError(msg) {
+    const e = document.getElementById('errorMsg');
+    e.textContent = msg;
+    e.classList.add('show');
+    document.getElementById('successMsg').classList.remove('show');
+  }
+
+  function showSuccess(msg) {
+    const s = document.getElementById('successMsg');
+    s.textContent = msg;
+    s.classList.add('show');
+    document.getElementById('errorMsg').classList.remove('show');
+  }
+
+  function hideMessages() {
+    document.getElementById('errorMsg').classList.remove('show');
+    document.getElementById('successMsg').classList.remove('show');
+  }
+
+  async function login() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    if (!email || !pass) { showError('Please fill all fields'); return; }
+
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.textContent = 'Signing in...';
+
+    try {
+      const res = await fetch(API + '/api/auth/email/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass })
+      });
+      const data = await res.json();
+
+      if (data.success || data.token) {
+        localStorage.setItem('gyan_token', data.token);
+        localStorage.setItem('gyan_user', JSON.stringify(data.user || { email, name: email.split('@')[0] }));
+        showSuccess('Login successful! Redirecting...');
+        setTimeout(() => window.location.href = 'dashboard.html', 800);
+      } else {
+        showError(data.error || 'Invalid email or password');
+      }
+    } catch (e) {
+      // Demo mode - allow test login
+      if (email && pass.length >= 6) {
+        const demoUser = { id: 'demo-' + Date.now(), name: email.split('@')[0], email, plan: 'free', credits: 5 };
+        localStorage.setItem('gyan_token', 'demo-token-123');
+        localStorage.setItem('gyan_user', JSON.stringify(demoUser));
+        showSuccess('Demo mode — Redirecting...');
+        setTimeout(() => window.location.href = 'dashboard.html', 800);
+      } else {
+        showError('Server offline. Use any email + 6 char password for demo.');
+      }
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Sign In →';
+  }
+
+  async function signup() {
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const pass = document.getElementById('signupPass').value;
+
+    if (!name || !email || !pass) { showError('Please fill all fields'); return; }
+    if (pass.length < 6) { showError('Password must be at least 6 characters'); return; }
+
+    const btn = document.getElementById('signupBtn');
+    btn.disabled = true;
+    btn.textContent = 'Creating account...';
+
+    try {
+      const res = await fetch(API + '/api/auth/email/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password: pass })
+      });
+      const data = await res.json();
+
+      if (data.success || data.token) {
+        localStorage.setItem('gyan_token', data.token);
+        localStorage.setItem('gyan_user', JSON.stringify(data.user || { name, email, plan: 'free', credits: 5 }));
+        showSuccess('Account created! Redirecting...');
+        setTimeout(() => window.location.href = 'dashboard.html', 800);
+      } else {
+        showError(data.error || 'Signup failed');
+      }
+    } catch (e) {
+      // Demo mode
+      const demoUser = { id: 'demo-' + Date.now(), name, email, plan: 'free', credits: 5 };
+      localStorage.setItem('gyan_token', 'demo-token-123');
+      localStorage.setItem('gyan_user', JSON.stringify(demoUser));
+      showSuccess('Demo mode — Account created!');
+      setTimeout(() => window.location.href = 'dashboard.html', 800);
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Create Account →';
+  }
+
+  function githubLogin() {
+    window.location.href = API + '/api/auth/github';
+  }
+
+  // Check if already logged in
+  if (localStorage.getItem('gyan_token')) {
+    window.location.href = 'dashboard.html';
+  }
+
+  // Check URL params for errors
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('error')) showError('Login failed. Please try again.');
+  if (params.get('token')) {
+    localStorage.setItem('gyan_token', params.get('token'));
+    try { localStorage.setItem('gyan_user', JSON.stringify(JSON.parse(decodeURIComponent(params.get('user') || '{}')))); } catch(e){}
+    window.location.href = 'dashboard.html';
+  }
+</script>
+</body>
+</html>
